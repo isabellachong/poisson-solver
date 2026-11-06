@@ -1,0 +1,20 @@
+# Explicitly load with --config namelist.txt. CLI arguments override these values.
+dimension=2
+nx=64
+ny=64
+# nz is used only when dimension=3.
+nz=64
+px=0
+py=0
+pz=0
+iterations=500
+check_every=0
+warmup=3
+rtol=1e-8
+atol=1e-10
+problem=mixed
+overlap=0
+block_size=256
+communication=cuda-aware
+solution_prefix=
+end

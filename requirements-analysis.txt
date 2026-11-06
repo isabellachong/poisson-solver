@@ -1,0 +1,2 @@
+# Only plotting needs this dependency; validation/benchmark scripts use the standard library.
+matplotlib>=3.7,<4

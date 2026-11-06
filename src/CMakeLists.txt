@@ -1,0 +1,16 @@
+add_library(poisson_common config.cpp problem.cpp decomposition.cpp cpu_backend.cpp solver.cpp io_utils.cpp)
+target_include_directories(poisson_common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_options(poisson_common PRIVATE
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall;-Wextra;-Wpedantic>)
+if(POISSON_ENABLE_MPI)
+  add_library(poisson_mpi_runtime mpi_runtime.cpp)
+  target_link_libraries(poisson_mpi_runtime PUBLIC poisson_common MPI::MPI_CXX)
+  target_compile_definitions(poisson_mpi_runtime PUBLIC OMPI_SKIP_MPICXX=1 MPICH_SKIP_MPICXX=1)
+  target_compile_options(poisson_mpi_runtime PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall;-Wextra;-Wpedantic>)
+endif()
+if(POISSON_ENABLE_CUDA)
+  add_library(poisson_cuda cuda_backend.cu cuda_kernels.cu)
+  target_link_libraries(poisson_cuda PUBLIC poisson_common CUDA::cudart)
+  set_target_properties(poisson_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+endif()
