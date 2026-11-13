@@ -1,0 +1,40 @@
+#!/bin/bash
+#PBS -N cpu_multinode_check
+#PBS -l select=2:ncpus=2:mpiprocs=2:ompthreads=1:mem=4gb
+#PBS -l place=scatter
+#PBS -l walltime=00:10:00
+#PBS -j oe
+
+set -eo pipefail
+cd "${PBS_O_WORKDIR:?Submit from the project root}"
+export POISSON_MODULE="${POISSON_MODULE:-nvhpc-hpcx-cuda12/26.1}"
+export POISSON_BUILD_DIR="${POISSON_BUILD_DIR:-build-cpu}"
+export POISSON_RESULTS_ROOT="${POISSON_RESULTS_ROOT:-results/final-cpu}"
+source jobs/vanda_environment.sh
+set -u
+
+log_dir="$poisson_results/cpu-multinode-check-${PBS_JOBID:?}"
+mkdir -p "$log_dir"
+exec > "$log_dir/job.log" 2>&1
+mpiexec --version
+ranks_per_node=2
+source jobs/vanda_cpu_launcher.sh
+if [[ -z "${PBS_NODEFILE:-}" ]]; then
+    echo 'This check requires a PBS two-node allocation.' >&2
+    exit 1
+fi
+sort "$PBS_NODEFILE" | uniq -c
+if (( $(sort -u "$PBS_NODEFILE" | wc -l) != 2 )); then
+    echo 'Expected two distinct allocated hosts for the multi-node check.' >&2
+    exit 1
+fi
+
+# Four ranks, two per node, exercise actual inter-node boundary exchange and
+# collectives in both dimensions. Each MPI validation invocation has a 180 s
+# timeout in validate_mpi.py; this job does not collect performance timings.
+"$poisson_python" tests/validate_mpi.py \
+    --serial "$poisson_build/executables/poisson_serial" \
+    --parallel "$poisson_build/executables/poisson_mpi" --backend cpu \
+    --grid2d 2x2 --grid3d 2x2x1 \
+    "${poisson_launcher_args[@]}"
+echo 'Completed two-node CPU MPI validation'

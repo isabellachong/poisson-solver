@@ -1,0 +1,35 @@
+#!/bin/bash
+#PBS -N poisson_cpu_check
+#PBS -l select=1:ncpus=8:mpiprocs=8:ompthreads=1:mem=16gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+
+set -eo pipefail
+cd "${PBS_O_WORKDIR:?Submit from the project root}"
+export POISSON_MODULE="${POISSON_MODULE:-nvhpc-hpcx-cuda12/26.1}"
+export POISSON_BUILD_DIR="${POISSON_BUILD_DIR:-build-cpu}"
+export POISSON_RESULTS_ROOT="${POISSON_RESULTS_ROOT:-results/vanda-cpu}"
+source jobs/vanda_environment.sh
+set -u
+
+log_dir="$poisson_results/cpu-check-${PBS_JOBID:?}"
+mkdir -p "$log_dir"
+exec > "$log_dir/job.log" 2>&1
+module list
+source jobs/vanda_build_environment.sh
+mpicxx --version
+mpiexec --version
+ranks_per_node=8
+source jobs/vanda_cpu_launcher.sh
+
+cmake -S . -B "$poisson_build" -DCMAKE_BUILD_TYPE=Release \
+    -DPOISSON_ENABLE_MPI=ON -DPOISSON_ENABLE_CUDA=OFF \
+    "-DCMAKE_CXX_COMPILER=$(command -v mpicxx)" \
+    "-DMPI_CXX_COMPILER=$(command -v mpicxx)"
+cmake --build "$poisson_build" --parallel 4
+ctest --test-dir "$poisson_build" --output-on-failure
+"$poisson_python" tests/validate_mpi.py \
+    --serial "$poisson_build/executables/poisson_serial" \
+    --parallel "$poisson_build/executables/poisson_mpi" --backend cpu \
+    "${poisson_launcher_args[@]}"
+

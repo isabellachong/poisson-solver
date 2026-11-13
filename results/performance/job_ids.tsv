@@ -1,0 +1,15 @@
+category	configuration	job_id
+cpu	cpu_1_r5	1544704.stdct-mgmt-02
+cpu	cpu_4_r5	1544705.stdct-mgmt-02
+cpu	cpu_8_r5	1544706.stdct-mgmt-02
+cpu	cpu_16_r5	1544707.stdct-mgmt-02
+cpu	cpu_32_r5	1544708.stdct-mgmt-02
+cpu	cpu_64_r5	1544709.stdct-mgmt-02
+cpu	cpu_128_r5	1544710.stdct-mgmt-02
+cpu	cpu_256_r5	1544711.stdct-mgmt-02
+gpu	gpu_1_r5	1544712.stdct-mgmt-02
+gpu	gpu_2_r5	1544713.stdct-mgmt-02
+gpu	gpu_sharing_r5	1544714.stdct-mgmt-02
+serial	serial_r5	1544715.stdct-mgmt-02
+plot	cpu_figures_r5	1544716.stdct-mgmt-02
+plot	gpu_figures_r5	1544717.stdct-mgmt-02

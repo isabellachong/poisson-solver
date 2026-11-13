@@ -1,0 +1,31 @@
+#!/bin/bash
+#PBS -N poisson_accuracy
+#PBS -l select=1:ncpus=1:mpiprocs=1:ompthreads=1:mem=4gb
+#PBS -l walltime=00:20:00
+#PBS -j oe
+
+set -eo pipefail
+cd "${PBS_O_WORKDIR:?Submit from the project root}"
+export POISSON_BUILD_DIR="${POISSON_BUILD_DIR:-build-cpu}"
+export POISSON_RESULTS_ROOT="${POISSON_RESULTS_ROOT:-results/accuracy}"
+export POISSON_PYTHON="${POISSON_PYTHON:-$PWD/.venv-analysis/bin/python}"
+source jobs/vanda_environment.sh
+set -u
+
+run_dir="$poisson_results/accuracy-${PBS_JOBID:?}"
+mkdir -p "$run_dir"
+exec > "$run_dir/job.log" 2>&1
+hostname
+if command -v lscpu >/dev/null 2>&1; then lscpu; fi
+module list
+
+# Existing independent fixed-step and stopping-behaviour checks.
+"$poisson_python" tests/validate_mpi.py --serial-only \
+    --serial "$poisson_build/executables/poisson_serial"
+
+# Six converged sine solves, independent eigenmode checks, and the accuracy plot.
+# These use convergence tolerances, not POISSON_ITERATIONS/POISSON_REPEATS.
+"$poisson_python" scripts/accuracy_study.py \
+    --exe "$poisson_build/executables/poisson_serial" \
+    --output-dir "$run_dir/study" --plot
+echo "Completed spatial-accuracy study in $run_dir/study"

@@ -8,11 +8,13 @@ require a constant measured GPU count. Actual GPU counts always come from the so
 """
 import argparse
 import csv
-import io
 import math
 from pathlib import Path
 import subprocess
 import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts.solver_output import parse_summary
 
 
 def shape(text, dimension):
@@ -84,10 +86,9 @@ def main():
                     print(run.stderr, end='', file=sys.stderr)
                     if run.returncode:
                         raise RuntimeError(f'Solver failed ({run.returncode}): {run.stdout}')
-                    rows = list(csv.DictReader(io.StringIO(run.stdout)))
-                    if len(rows) != 1 or rows[0]['mode'] != a.mode:
+                    row = parse_summary(run.stdout)
+                    if row['mode'] != a.mode:
                         raise RuntimeError('Unexpected solver mode or output')
-                    row = rows[0]
                     if a.mode == 'mpi-cuda' and a.kind in ('weak', 'sharing'):
                         gpus = int(row['gpus_used'])
                         measured = ranks/gpus if a.kind == 'weak' else gpus

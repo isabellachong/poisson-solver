@@ -6,11 +6,14 @@ automatically distributes ranks across visible allocated GPUs, sharing as needed
 """
 import argparse
 import csv
-import io
 import math
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts.solver_output import parse_summary
 
 
 def exact(dim, xyz):
@@ -59,10 +62,8 @@ def execute(command):
     process = subprocess.run(list(map(str, command)), text=True, capture_output=True, timeout=180)
     if process.returncode:
         raise RuntimeError(f"Command failed ({process.returncode}): {command}\n{process.stdout}\n{process.stderr}")
-    rows = list(csv.DictReader(io.StringIO(process.stdout)))
-    if len(rows) != 1:
-        raise AssertionError(f"Expected one summary row: {process.stdout}")
-    return rows[0]
+    print(process.stderr, end='', file=sys.stderr)
+    return parse_summary(process.stdout)
 
 
 def check_solution(prefix, expected):
@@ -91,14 +92,18 @@ def main():
     parser.add_argument('--launcher-arg', action='append', default=[])
     parser.add_argument('--grid2d', default='2x2')
     parser.add_argument('--grid3d', default='2x2x2')
+    parser.add_argument('--points', type=int, nargs=3, default=(9, 7, 5), metavar=('NX', 'NY', 'NZ'))
     parser.add_argument('--communication', choices=['host', 'cuda-aware', 'both'], default='both')
     args = parser.parse_args()
+    if min(args.points) < 1:
+        parser.error('Reference point counts must be positive')
     serial, parallel = str(Path(args.serial).resolve()), str(Path(args.parallel).resolve())
     checked = 0
-    with tempfile.TemporaryDirectory(prefix='poisson-validation-') as folder:
+    # MPI ranks on other nodes must see the same solution-output directory.
+    with tempfile.TemporaryDirectory(prefix='poisson-validation-', dir=Path.cwd()) as folder:
         folder = Path(folder)
         for dim in (2, 3):
-            n, steps = (9, 7, 5), 9
+            n, steps = tuple(args.points), 9
             expected, residual = reference(dim, n, steps)
             common = ['--dim', dim, '--nx', n[0], '--ny', n[1], '--nz', n[2],
                       '--iterations', steps, '--check-every', 0, '--warmup', 2, '--problem', 'polynomial']
@@ -110,8 +115,8 @@ def main():
             if args.serial_only:
                 continue
             shape = tuple(map(int, (args.grid2d if dim == 2 else args.grid3d).split('x')))
-            if len(shape) != dim or min(shape) < 1 or sum(x > 1 for x in shape) < 2:
-                parser.error('Distributed grids must split at least two directions')
+            if len(shape) != dim or min(shape) < 1 or (math.prod(shape) > 1 and sum(x > 1 for x in shape) < 2):
+                parser.error('Use one rank or a distributed grid that splits at least two directions')
             ranks = math.prod(shape)
             grid_arguments = [item for axis, value in zip('xyz', shape) for item in ('--p'+axis, value)]
             transports = ['host'] if args.backend == 'cpu' else (['host', 'cuda-aware'] if args.communication == 'both' else [args.communication])

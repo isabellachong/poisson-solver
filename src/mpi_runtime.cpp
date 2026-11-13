@@ -33,6 +33,7 @@ MpiRuntime::MpiRuntime(const Config& c, const Device& device, bool gpu) {
     grid_=make_grid(c,info_.process_grid,coordinates);
     neighbours_.fill(MPI_PROC_NULL);
     for(int axis=0;axis<c.dimension;++axis) {
+        // Find the ranks of the neighbouring processes along this axis.
         mpi_check(MPI_Cart_shift(communicator_,axis,1,&neighbours_[2*axis],&neighbours_[2*axis+1]),"MPI_Cart_shift");
         const auto count=face_size(grid_,2*axis);
         if(count>static_cast<std::size_t>(std::numeric_limits<int>::max()))

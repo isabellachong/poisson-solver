@@ -10,7 +10,7 @@ Region owned_region(const Grid& grid);
 Region interior_region(const Grid& grid);
 std::vector<Region> boundary_regions(const Grid& grid);
 std::size_t face_size(const Grid& grid, int face);
-// face = 2*axis + side, with side 0=minus, 1=plus.
+// Face = 2*axis + side, with side 0=minus, 1=plus.
 POISSON_HD inline void face_point(const Grid& g, int face, std::size_t q, bool received,
                                   int& i, int& j, int& k) {
     const int axis = face / 2;
@@ -20,7 +20,7 @@ POISSON_HD inline void face_point(const Grid& g, int face, std::size_t q, bool r
     else if(axis == 1) { j = fixed; i = static_cast<int>(q % g.n[0])+1; if(g.dimension == 3) k = static_cast<int>(q / g.n[0])+1; }
     else { k = fixed; i = static_cast<int>(q % g.n[0])+1; j = static_cast<int>(q / g.n[0])+1; }
 }
-// implements jacobi update
+// Find neighbours and calculate the stencil value at a point. 
 POISSON_HD inline real stencil_value(const real* old_values, const real* rhs,
                                      std::size_t q, const Grid& g, const Coefficients& c) {
     real sum = rhs[q] + c.inverse_h2[0]*(old_values[q-1]+old_values[q+1])

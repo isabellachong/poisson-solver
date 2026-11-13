@@ -11,6 +11,7 @@ Result solve(const Config& c, Fields initial, Backend& backend, Runtime& runtime
     const auto& g=backend.grid();
     const auto interior=interior_region(g);
     const auto boundaries=boundary_regions(g);
+    // Jacobi update; interior points are updated first, then boundaries. 
     auto iteration=[&] {
         if(!runtime.distributed_execution()) backend.update(owned_region(g));
         else {
@@ -20,7 +21,7 @@ Result solve(const Config& c, Fields initial, Backend& backend, Runtime& runtime
             if(!c.overlap) backend.update(interior);
             for(const auto& r:boundaries) backend.update(r);
         }
-        backend.finish_iteration();
+        backend.finish_iteration(); // Completes sweep and swaps old/new solution arrays. 
     };
     auto residual=[&] {
         // The owned solution has advanced after a swap; refresh neighbouring values.
@@ -33,6 +34,7 @@ Result solve(const Config& c, Fields initial, Backend& backend, Runtime& runtime
     result.rhs_inf=runtime.maximum(initial.rhs_inf);
     result.threshold=c.atol+c.rtol*result.rhs_inf;
     if(!std::isfinite(result.threshold)) throw std::invalid_argument("Residual tolerance overflows");
+    // Run warmpup iterations to avoid measuring initialization overhead.
     for(int k=0;k<c.warmup;++k) iteration();
     if(c.warmup) backend.reset(initial);
     initial=Fields{}; // Release initialization arrays before the measured solve.
@@ -40,6 +42,7 @@ Result solve(const Config& c, Fields initial, Backend& backend, Runtime& runtime
     if(c.check_every) { result.residual_inf=residual(); result.converged=result.residual_inf<=result.threshold; current_residual=true; }
     const double setup_elapsed=runtime.now()-setup_start;
     runtime.barrier();
+    // Solve: iterate until convergence or maximum iterations.
     const double start=runtime.now();
     while(result.iterations<c.iterations && !(c.check_every && result.converged)) {
         iteration(); ++result.iterations; current_residual=false;
@@ -49,6 +52,7 @@ Result solve(const Config& c, Fields initial, Backend& backend, Runtime& runtime
         }
     }
     const double solve_elapsed=runtime.now()-start;
+    // Compute error against exact solution and write output.
     const double diagnostics_start=runtime.now();
     if(!current_residual) result.residual_inf=residual();
     result.converged=result.residual_inf<=result.threshold;

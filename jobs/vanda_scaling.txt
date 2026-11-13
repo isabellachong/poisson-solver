@@ -1,0 +1,113 @@
+#!/bin/bash
+#PBS -N poisson_scale
+#PBS -l select=1:ncpus=36:mpiprocs=8:ompthreads=1:ngpus=1
+#PBS -l place=scatter
+#PBS -l walltime=04:00:00
+#PBS -j oe
+
+set -eo pipefail
+cd "${PBS_O_WORKDIR:?Submit from the project root}"
+source jobs/vanda_environment.sh
+set -u
+
+gpu_count="${POISSON_GPUS:-1}"
+ranks_per_node="${POISSON_RANKS_PER_NODE:-8}"
+study="${POISSON_STUDY:-all}"
+case "$gpu_count" in
+    1) grid2d=2x4; grid3d=2x2x2 ;;
+    2) grid2d=4x4; grid3d=4x2x2 ;;
+    4) grid2d=8x4; grid3d=4x4x2 ;;
+    *) echo 'POISSON_GPUS must be 1, 2, or 4.' >&2; exit 1 ;;
+esac
+case "$ranks_per_node" in
+    8) ;;
+    16)
+        if [[ "$gpu_count" == 1 ]]; then
+            echo 'Use eight ranks per node for the one-GPU baseline.' >&2
+            exit 1
+        fi ;;
+    *) echo 'POISSON_RANKS_PER_NODE must be 8 or 16.' >&2; exit 1 ;;
+esac
+case "$study" in
+    all|strong|weak) ;;
+    sharing)
+        if [[ "$gpu_count" != 1 ]]; then
+            echo 'The sharing study needs the one-node, one-GPU allocation.' >&2
+            exit 1
+        fi ;;
+    *) echo 'POISSON_STUDY must be all, strong, weak, or sharing.' >&2; exit 1 ;;
+esac
+
+run_dir="$poisson_results/scale-${PBS_JOBID:?}"
+mkdir -p "$run_dir"
+exec > "$run_dir/job.log" 2>&1
+module list
+nvidia-smi
+nvcc --version
+mpiexec --version
+if [[ -n "${PBS_NODEFILE:-}" ]]; then
+    sort "$PBS_NODEFILE" | uniq -c
+fi
+communication="${POISSON_COMMUNICATION:-cuda-aware}"
+iterations="${POISSON_ITERATIONS:-1000}"
+repeats="${POISSON_REPEATS:-3}"
+
+# Verify the actual GPU mapping before collecting any performance rows.
+IFS=x read -r px py pz <<< "$grid3d"
+mpiexec -n "$((8 * gpu_count))" --map-by "ppr:${ranks_per_node}:node" --bind-to "$poisson_bind_to" \
+    "$poisson_build/executables/poisson_mpi" \
+    --dim 3 --nx 32 --ny 32 --nz 16 --px "$px" --py "$py" --pz "$pz" \
+    --iterations 5 --check-every 0 --warmup 0 --overlap 1 \
+    --communication "$communication" > "$run_dir/mapping.csv"
+"$poisson_python" - "$run_dir/mapping.csv" "$gpu_count" <<'PY'
+import sys
+from pathlib import Path
+from scripts.solver_output import parse_summary
+row, expected = parse_summary(Path(sys.argv[1]).read_text()), int(sys.argv[2])
+if (row['mode'] != 'mpi-cuda' or int(row['gpus_used']) != expected
+        or int(row['mpi_ranks']) != 8*expected or int(row['max_ranks_per_gpu']) != 8):
+    raise SystemExit('Unexpected rank/GPU mapping. Check PBS resources and visibility.')
+PY
+
+# These small point-by-point checks exercise all allocated nodes and both schedules.
+"$poisson_python" tests/validate_mpi.py \
+    --serial "$poisson_build/executables/poisson_serial" \
+    --parallel "$poisson_build/executables/poisson_mpi" --backend cuda \
+    --grid2d "$grid2d" --grid3d "$grid3d" --communication "$communication" \
+    --launcher-arg=--map-by "--launcher-arg=ppr:${ranks_per_node}:node" \
+    --launcher-arg=--bind-to "--launcher-arg=$poisson_bind_to"
+
+benchmark=("$poisson_python" scripts/benchmark.py \
+    --exe "$poisson_build/executables/poisson_mpi" --mode mpi-cuda \
+    --iterations "$iterations" --repeats "$repeats" --overlap 0 1 \
+    --communication "$communication" \
+    --launcher-arg=--map-by "--launcher-arg=ppr:${ranks_per_node}:node" \
+    --launcher-arg=--bind-to "--launcher-arg=$poisson_bind_to")
+
+if [[ "$study" == all || "$study" == strong ]]; then
+    "${benchmark[@]}" --kind strong --dim 2 --process-grids "$grid2d" \
+        --nx "${POISSON_STRONG_2D:-8192}" --ny "${POISSON_STRONG_2D:-8192}" \
+        --output "$run_dir/strong-2d.csv"
+    "${benchmark[@]}" --kind strong --dim 3 --process-grids "$grid3d" \
+        --nx "${POISSON_STRONG_3D:-256}" --ny "${POISSON_STRONG_3D:-256}" \
+        --nz "${POISSON_STRONG_3D:-256}" --output "$run_dir/strong-3d.csv"
+fi
+if [[ "$study" == all || "$study" == weak ]]; then
+    # benchmark.py interprets weak-scaling sizes as LOCAL points per rank.
+    "${benchmark[@]}" --kind weak --dim 2 --process-grids "$grid2d" \
+        --nx "${POISSON_WEAK_2D:-1024}" --ny "${POISSON_WEAK_2D:-1024}" \
+        --output "$run_dir/weak-2d.csv"
+    "${benchmark[@]}" --kind weak --dim 3 --process-grids "$grid3d" \
+        --nx "${POISSON_WEAK_3D:-128}" --ny "${POISSON_WEAK_3D:-128}" \
+        --nz "${POISSON_WEAK_3D:-128}" --output "$run_dir/weak-3d.csv"
+fi
+if [[ "$study" == sharing ]]; then
+    "${benchmark[@]}" --kind sharing --dim 2 --process-grids 1x1 2x2 2x4 \
+        --nx "${POISSON_STRONG_2D:-8192}" --ny "${POISSON_STRONG_2D:-8192}" \
+        --output "$run_dir/sharing-2d.csv"
+    "${benchmark[@]}" --kind sharing --dim 3 --process-grids 1x1x1 2x2x1 2x2x2 \
+        --nx "${POISSON_STRONG_3D:-256}" --ny "${POISSON_STRONG_3D:-256}" \
+        --nz "${POISSON_STRONG_3D:-256}" --output "$run_dir/sharing-3d.csv"
+fi
+echo "Completed $study measurements in $run_dir"
+

@@ -1,0 +1,527 @@
+Currently Loaded Modulefiles:
+ 1) hpcx   2) nvhpc-hpcx-cuda12/26.1  
+Thu Nov 12 11:50:11 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A40                     Off |   00000000:0A:00.0 Off |                    0 |
+|  0%   50C    P0             59W /  300W |       0MiB /  46068MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2025 NVIDIA Corporation
+Built on Tue_May_27_02:21:03_PDT_2025
+Cuda compilation tools, release 12.9, V12.9.86
+Build cuda_12.9.r12.9/compiler.36037853_0
+mpiexec (OpenRTE) 4.1.9a1
+
+Report bugs to http://www.open-mpi.org/community/help/
+      8 gn-a40-025.stdct.loc
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+Passed 8 executable checks (independent numerical reference, owned values, residuals, and stopping behaviour)
+strong: grid=(2, 4), points=(4096, 4096), repeat=0, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=0, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=1, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=1, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=2, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=2, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=3, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=3, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=4, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+strong: grid=(2, 4), points=(4096, 4096), repeat=4, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+Saved results/rerun-1000x5-20261112-111610-3090256/gpu/scale-1544712.stdct-mgmt-02/strong-2d.csv
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=0, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=0, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=1, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=1, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=2, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=2, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=3, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=3, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=4, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+strong: grid=(2, 2, 2), points=(256, 256, 256), repeat=4, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+Saved results/rerun-1000x5-20261112-111610-3090256/gpu/scale-1544712.stdct-mgmt-02/strong-3d.csv
+weak: grid=(2, 4), points=(2048, 4096), repeat=0, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=0, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=1, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=1, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=2, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=2, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=3, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=3, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=4, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+weak: grid=(2, 4), points=(2048, 4096), repeat=4, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x4
+Saved results/rerun-1000x5-20261112-111610-3090256/gpu/scale-1544712.stdct-mgmt-02/weak-2d.csv
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=0, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=0, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=1, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=1, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=2, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=2, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=3, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=3, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=4, overlap=0
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+weak: grid=(2, 2, 2), points=(256, 256, 256), repeat=4, overlap=1
+GPU mapping: 1 device(s), maximum 8 rank(s) per GPU
+  rank 0: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 1: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 2: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 3: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 4: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 5: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 6: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+  rank 7: GN-A40-025|5bf1583c62e6c2f7ee962d108d6f59b7
+Process grid: 2x2x2
+Saved results/rerun-1000x5-20261112-111610-3090256/gpu/scale-1544712.stdct-mgmt-02/weak-3d.csv
+Completed all measurements in results/rerun-1000x5-20261112-111610-3090256/gpu/scale-1544712.stdct-mgmt-02
