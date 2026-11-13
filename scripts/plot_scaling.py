@@ -8,8 +8,8 @@ Only PNG figures and summary.csv are generated. GPU sharing never produces a GPU
 hardware-efficiency value. GPU strong scaling keeps ranks/GPU or total ranks
 constant; GPU weak scaling keeps ranks/GPU constant.
 Speedup uses the smallest resource count in each series, identified in the table.
-CPU MPI figures count one allocated CPU core per rank. Weak-scaling size plots
-vary hardware together with problem size; they are not fixed-resource sweeps.
+CPU MPI figures count one allocated CPU core per rank. Parallel plots use
+resource count on the horizontal axis; serial size-sweep plots are retained.
 """
 import argparse
 from collections import defaultdict
@@ -22,13 +22,6 @@ import statistics
 COLORS = {'2': '#176b98', '3': '#c46b23'}
 MARKERS = {'2': 'o', '3': 's'}
 BACKENDS = {'serial': 'Serial CPU', 'mpi-cpu': 'MPI CPU', 'mpi-cuda': 'MPI+CUDA'}
-WEAK_SIZE_NOTE = (
-    'A separate parallel runtime-versus-problem-size study at fixed core/GPU count '
-    'was not measured. Replotting weak-scaling data against problem size is '
-    'possible, but it must remain labelled as weak scaling because hardware '
-    'also changes.')
-
-
 def legend_title(curves, derived=False):
     counts = {count for curve in curves.values() for count in curve['counts']}
     if len(counts) == 1:
@@ -118,43 +111,6 @@ def plot_scaling_group(plt, output, key, schedules, metric):
         fig.text((position.x0+position.x1)/2, .015, note, ha='center', va='bottom', fontsize=8)
     stem = f'{kind}_{mode}_{communication}_{problem}_k{iterations}'
     fig.savefig(output/(stem+f'_{metric}.png'), dpi=300)
-    plt.close(fig)
-
-
-def plot_weak_problem_size(plt, output, key, schedules, field):
-    _, mode, communication, problem, iterations = key
-    overlaps = sorted(schedules)
-    fig, axes = plt.subplots(1, len(overlaps), squeeze=False,
-                             figsize=(5*len(overlaps), 4.8))
-    xlabel = ('Global interior unknown count M' if field == 'unknowns' else
-              'Implicit matrix nonzero count')
-    resource_unit = 'CPUs' if mode == 'mpi-cpu' else 'GPUs'
-    for ax, overlap in zip(axes[0], overlaps):
-        curves = schedules[overlap]
-        for dimension, curve in sorted(curves.items()):
-            times = curve['runtime']
-            errors = [[t-low for t, low in zip(times, curve['low'])],
-                      [high-t for t, high in zip(times, curve['high'])]]
-            resources = curve['points']
-            count_label = (str(resources[0]) if resources[0] == resources[-1] else
-                           f'{resources[0]}-{resources[-1]}')
-            ax.errorbar(curve[field], times, yerr=errors, marker=MARKERS[dimension],
-                        markersize=5, capsize=3, color=COLORS[dimension],
-                        label=f'{dimension}D ({count_label} {resource_unit})')
-        style_axes(ax, xlabel, 'Solve time (s)', log_y=True)
-        ax.set_title(f'Communication overlap {"on" if overlap == "1" else "off"}', fontsize=10)
-        ax.legend(title=legend_title(curves), fontsize=9, title_fontsize=9)
-    quantity = 'unknown count' if field == 'unknowns' else 'matrix nonzeros'
-    fig.suptitle(f'{BACKENDS[mode]} weak scaling: runtime versus {quantity}\n'
-                 f'{int(iterations):,} iterations | {problem} problem | {communication} communication',
-                 fontsize=12)
-    fig.tight_layout(rect=(0, .1, 1, 1))
-    fig.text(.5, .015,
-             'Weak scaling: hardware increases with problem size; work per CPU/GPU stays fixed.\n'
-             'A separate parallel size sweep at fixed core/GPU count was not measured.',
-             ha='center', va='bottom', fontsize=8)
-    stem = f'weak_{mode}_{communication}_{problem}_k{iterations}'
-    fig.savefig(output/(stem+f'_runtime_vs_{field}.png'), dpi=300)
     plt.close(fig)
 
 
@@ -260,14 +216,16 @@ def main():
         for metric in metrics:
             plot_scaling_group(plt, output, key, schedules, metric)
         if kind == 'weak':
+            # Remove only this series' obsolete generated size plots when
+            # reusing an output directory from an earlier script version.
+            _, mode, communication, problem, iterations = key
+            stem = f'weak_{mode}_{communication}_{problem}_k{iterations}'
             for field in ('unknowns', 'nonzeros'):
-                plot_weak_problem_size(plt, output, key, schedules, field)
+                (output/f'{stem}_runtime_vs_{field}.png').unlink(missing_ok=True)
     if tables:
         with (output/'summary.csv').open('w', newline='') as stream:
             writer = csv.DictWriter(stream, fieldnames=list(tables[0]))
             writer.writeheader(); writer.writerows(tables)
-    if any(key[0] == 'weak' for key in plot_groups):
-        print(WEAK_SIZE_NOTE)
     print(f'Saved figures and median summary to {output}')
 
 

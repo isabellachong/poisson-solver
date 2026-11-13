@@ -1,6 +1,7 @@
 # Implementation and manual execution reference
 
-For the Vanda build, submission and results workflow, start with [the main README](../README.md#vanda-pbs-jobs).
+Start with [the README](../README.md) for direct build/run commands and
+[EXPERIMENTS.md](EXPERIMENTS.md) for the measured experiment configurations.
 
 ## Build
 
@@ -30,10 +31,9 @@ If the cluster requires an explicit GPU target, add
 A serial-only build is possible with both `POISSON_ENABLE_MPI=OFF` and
 `POISSON_ENABLE_CUDA=OFF`.
 
-Lecture 12 lists Vanda's recommended CUDA-aware module as
-`module load nvhpc-hpcx-cuda12/26.1`. Use the current cluster allocation and module
-instructions when building/running there. The manual commands above do not
-submit jobs; the Vanda workflow in the main README uses PBS job files and a submission helper.
+The Vanda measurements used `module load nvhpc-hpcx-cuda12/26.1`. Initialize the
+compiler/MPI/CUDA environment directly, then run these commands inside an
+appropriate allocation. No project scheduler scripts are needed.
 
 ## Basic runs
 
@@ -256,61 +256,19 @@ The benchmarking script launches real executables inside an existing allocation,
 alternates overlap order across repeats, and records results. It never simulates
 GPU measurements or submits jobs. Existing CSVs are not overwritten.
 
-```sh
-# Serial runtime versus problem size; repeat with --dim 3 and suitable sizes.
-python3 scripts/benchmark.py --exe build-cpu/executables/poisson_serial --mode serial --kind serial --dim 2 --sizes 64 128 256 512 --output results/serial2d.csv
+See [EXPERIMENTS.md](EXPERIMENTS.md) for the direct 1,000-iteration/five-repeat
+commands, CPU process grids through 256 ranks, one-/two-GPU layouts, serial
+size sweep, and plotting. Those commands use the same sizes and timing scope
+as the project study. Request the required resources through your cluster;
+256 CPU ranks require 256 allocated CPU cores.
 
-# Strong scaling to 256 CPU ranks, with one CPU core allocated per rank.
-python3 scripts/benchmark.py --exe build-cpu/executables/poisson_mpi --mode mpi-cpu --kind strong --dim 2 --process-grids 1x1 2x2 4x4 8x8 16x16 --nx 2048 --ny 2048 --output results/cpu2d-strong.csv
-
-# Weak scaling: nx/ny here specify LOCAL counts; global counts grow with process grid.
-python3 scripts/benchmark.py --exe build-cpu/executables/poisson_mpi --mode mpi-cpu --kind weak --dim 2 --process-grids 1x1 2x2 4x4 8x8 16x16 --nx 128 --ny 128 --output results/cpu2d-weak.csv
-
-# With one allocated GPU visible: increase ranks while GPU count stays fixed.
-# This is a GPU-sharing study, not GPU hardware scaling.
-python3 scripts/benchmark.py --exe build-gpu/executables/poisson_mpi --mode mpi-cuda --kind sharing --dim 2 --process-grids 1x1 2x2 4x4 --nx 1024 --ny 1024 --output results/gpu-sharing.csv
-```
-
-Request and bind the required CPU/GPU resources using the cluster's instructions.
-256 ranks require 256 allocated CPU cores for a 256-core study; do not oversubscribe
-a smaller CPU allocation. GPU sharing is local to each GPU node, not remote GPU access.
-
-For GPU strong scaling, keep global unknown count fixed while increasing
-**physical GPUs actually used**. Either keep ranks/GPU constant, or keep the total
-MPI rank count and decomposition constant while reducing sharing as GPUs increase.
-Report which strategy was used. For GPU weak scaling, keep
-unknowns/GPU and ranks/GPU fixed while increasing GPUs. The benchmark script
-checks the measured rank/GPU ratio for weak-scaling runs. A sharing study checks
-that measured GPU count stays fixed. With only one GPU, report shared-rank and
-overlap performance, and state that multi-GPU scaling was not measured.
-
-For example, a constant four ranks/GPU can use 2D process grids `2x2`, `2x4`, and
-`4x4` with one, two, and four GPUs, respectively. Use allocations/device visibility
-that actually provide those mappings and combine the collected CSVs. One rank/GPU
-can instead use a one-rank baseline and four/eight/etc. ranks as resources permit.
-Another valid strong-scaling experiment keeps eight ranks and a `2x2x2` grid fixed
-while increasing visible allocated GPUs from one to two, four, and eight. This
-measures acceleration as GPU sharing decreases. Collect one strong-scaling CSV
-per allocation and combine them for plotting; keep global grid size unchanged.
-For 3D CPU studies, possible grids include `1x1x1`, `2x2x2`, `4x4x4`, and
-`8x8x4` (256 ranks). Noncubic grids are supported.
-
-Plotting requires Python `matplotlib` in addition to the standard library:
-
-```sh
-python3 scripts/plot_scaling.py --input results/cpu2d-strong.csv results/cpu2d-weak.csv --output-dir results/figures
-```
-
-The script writes runtime plots, speedup/efficiency plots where meaningful, and a
-median/min/max summary table. Time, problem-size, and resource-count axes use
-logarithmic scales. Speedup is relative to the smallest resource count **in each
-series**, identified in the table. For a one-core/one-GPU baseline this is the usual
-strong-scaling speedup; otherwise interpret it relative to that larger baseline.
-GPU sharing gets a relative-runtime speedup but no GPU hardware-efficiency figure.
-GPU strong plots require constant ranks/GPU or constant total ranks; GPU weak
-plots require constant ranks/GPU. CPU speedup uses the
-one-rank MPI baseline when supplied; report serial-to-MPI speedup separately if
-comparing against a separately measured serial reference.
+The scaling plotter validates constant global unknown count for strong scaling
+and constant unknowns per resource for weak scaling. GPU scaling keeps eight
+ranks per GPU; the sharing study holds one GPU fixed. It writes median/min/max
+summaries and runtime/speedup/efficiency PNGs. CPU plots label resources as CPU
+count under the one-core-per-rank protocol. GPU hardware plots use actual GPUs
+used, and sharing plots use MPI rank count. See [VALIDATION.md](VALIDATION.md)
+for the scope of checks and evidence.
 
 ## Sparse system size and memory
 
