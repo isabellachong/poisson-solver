@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Compare matched serial, MPI CPU and MPI+CUDA strong-scaling measurements.
+"""Compare matched serial, MPI CPU, MPI+CUDA and GPU-sharing measurements.
 
 Writes runtime and serial-relative acceleration PNGs for each overlap setting,
-plus comparison_summary.csv. Only measured configurations are included.
+plus comparison_summary.csv. Only measured configurations are included. When
+the same GPU configuration appears in strong and sharing inputs, use its strong
+measurements rather than pooling the two independent sets of repeats.
 """
 import argparse
 from collections import defaultdict
@@ -24,9 +26,10 @@ def summarize(filenames, *, size2d=4096, size3d=256, iterations=1000,
         for row in records:
             mode, experiment = row['mode'], row['experiment']
             if ((mode == 'serial' and experiment != 'serial')
-                    or (mode in ('mpi-cpu', 'mpi-cuda') and experiment != 'strong')
+                    or (mode == 'mpi-cpu' and experiment != 'strong')
+                    or (mode == 'mpi-cuda' and experiment not in ('strong', 'sharing'))
                     or mode not in ('serial', 'mpi-cpu', 'mpi-cuda')):
-                raise ValueError('Supply only serial size-sweep and parallel strong-scaling CSVs')
+                raise ValueError('Supply serial, CPU/GPU strong-scaling or GPU-sharing CSVs; not weak scaling')
             dim = int(row['dimension'])
             if dim not in (2, 3):
                 raise ValueError('Expected dimension 2 or 3')
@@ -58,14 +61,14 @@ def summarize(filenames, *, size2d=4096, size3d=256, iterations=1000,
             seconds = float(row['solve_seconds'])
             if not math.isfinite(seconds) or seconds <= 0:
                 raise ValueError('Solve times must be finite and positive')
-            groups[(dim, mode, ranks, gpus, overlap)].append(row)
+            groups[(dim, mode, ranks, gpus, overlap, experiment)].append(row)
     if len(protocols) != 1:
         raise ValueError('No matching measurements, or mixed problem/iteration/warm-up settings')
     gpu_blocks = {int(r['block_size']) for rows in groups.values()
                   for r in rows if r['mode'] == 'mpi-cuda'}
     if len(gpu_blocks) != 1:
         raise ValueError('Supply GPU measurements with one consistent CUDA block size')
-    medians = {}
+    medians, group_settings = {}, {}
     for key, rows in groups.items():
         if (len(rows) != repeats
                 or {int(r['repeat']) for r in rows} != set(range(repeats))):
@@ -73,26 +76,40 @@ def summarize(filenames, *, size2d=4096, size3d=256, iterations=1000,
         settings = {(r['px'], r['py'], r['pz'], r['communication'], r['block_size']) for r in rows}
         if len(settings) != 1:
             raise ValueError('Process grid, communication or CUDA block size changed within repeats')
+        group_settings[key] = settings
         times = [float(r['solve_seconds']) for r in rows]
         medians[key] = (statistics.median(times), min(times), max(times))
+    selected = {}
+    for key in medians:
+        configuration = key[:5]
+        previous = selected.get(configuration)
+        if previous is not None:
+            if group_settings[key] != group_settings[previous]:
+                raise ValueError('Strong/sharing settings differ for the same displayed GPU configuration')
+            if key[-1] != 'strong':
+                continue
+        selected[configuration] = key
     summaries = []
     order = {'serial': 0, 'mpi-cpu': 1, 'mpi-cuda': 2}
     for overlap in overlaps:
         for dim in (2, 3):
-            baseline = medians.get((dim, 'serial', 1, 0, 0))
-            if baseline is None:
+            baseline_key = selected.get((dim, 'serial', 1, 0, 0))
+            if baseline_key is None:
                 raise ValueError(f'Missing matching {dim}D serial baseline')
-            keys = [k for k in medians if k[0] == dim and (k[1] == 'serial' or k[4] == overlap)]
+            baseline = medians[baseline_key]
+            keys = [k for k in selected if k[0] == dim and (k[1] == 'serial' or k[4] == overlap)]
             if {k[1] for k in keys} != set(order):
                 raise ValueError(f'Need serial, MPI CPU and MPI+CUDA results for {dim}D overlap={overlap}')
             for key in sorted(keys, key=lambda k: (order[k[1]], k[3], k[2])):
                 _, mode, ranks, gpus, _ = key
-                sample = groups[key][0]
-                median, low, high = medians[key]
+                source_key = selected[key]
+                sample = groups[source_key][0]
+                median, low, high = medians[source_key]
                 speedup = baseline[0]/median
                 summaries.append(dict(
                     dimension=dim, nx=int(sample['nx']), ny=int(sample['ny']), nz=int(sample['nz']),
                     mode=mode, mpi_ranks=ranks, gpus_used=gpus,
+                    source_experiment=source_key[-1],
                     overlap='not applicable' if mode == 'serial' else overlap,
                     comparison_overlap=overlap, communication=sample['communication'],
                     problem=problem, iterations=iterations, warmup=int(sample['warmup']), repeats=repeats,
@@ -118,7 +135,7 @@ def render(summaries, output):
     plt.rcParams.update({'font.size': 10, 'axes.spines.top': False, 'axes.spines.right': False})
     for overlap in sorted({r['comparison_overlap'] for r in summaries}):
         for metric in ('runtime', 'speedup'):
-            fig, axes = plt.subplots(1, 2, figsize=(14, 5.6))
+            fig, axes = plt.subplots(1, 2, figsize=(14, 5.6), sharey=True)
             for ax, dim, color, marker in zip(axes, (2, 3), ('#176b98', '#c46b23'), ('o', 's')):
                 rows = [r for r in summaries if r['dimension'] == dim and r['comparison_overlap'] == overlap]
                 x = list(range(len(rows)))
@@ -128,11 +145,9 @@ def render(summaries, output):
                               [r['max_seconds']-r['median_seconds'] for r in rows]]
                     ax.errorbar(x, y, yerr=errors, fmt=marker, color=color, capsize=3)
                     ax.axhline(rows[0]['serial_median_seconds'], color='#666666', linestyle=':', alpha=.8)
-                    ax.set_yscale('log')
                 else:
                     ax.plot(x, [r['speedup_vs_serial'] for r in rows], marker, color=color)
                     ax.axhline(1, color='#666666', linestyle=':', alpha=.8)
-                    ax.set_ylim(bottom=0)
                 ax.set_xticks(x, [label(r) for r in rows], rotation=45, ha='right', fontsize=8)
                 gpu_start = next(i for i, r in enumerate(rows) if r['mode'] == 'mpi-cuda')
                 ax.axvline(gpu_start-.5, color='#bbbbbb', linewidth=.8)
@@ -140,6 +155,13 @@ def render(summaries, output):
                 ax.set(title=f'{dim}D: {shape}', xlabel='Execution configuration',
                        ylabel='Solve time (s)' if metric == 'runtime' else 'Acceleration relative to serial')
                 ax.grid(True, axis='y', which='both', alpha=.18)
+                ax.tick_params(axis='y', labelleft=True)
+            # Set the shared scale after both panels and their error bars exist,
+            # so limits include the complete 2D and 3D measurement ranges.
+            if metric == 'runtime':
+                axes[0].set_yscale('log')
+            else:
+                axes[0].set_ylim(bottom=0)
             first = summaries[0]
             fig.suptitle(f'Serial / MPI CPU / MPI+CUDA: {first["iterations"]:,} iterations | '
                          f'{first["problem"]} problem\nCommunication overlap {"on" if overlap else "off"} for parallel runs')
