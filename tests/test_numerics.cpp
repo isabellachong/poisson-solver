@@ -79,9 +79,9 @@ poisson::Int3 coordinates(int rank,poisson::Int3 p) {
     return {rank/(p[1]*p[2]),(rank/p[2])%p[1],rank%p[2]};
 }
 int rank_of(poisson::Int3 xyz,poisson::Int3 p) { return (xyz[0]*p[1]+xyz[1])*p[2]+xyz[2]; }
-void exchange(int dimension,bool thin=false) {
+void exchange(int dimension,bool thin=false,poisson::Int3 shape={0,0,0}) {
     const auto c=thin ? config(dimension,3,3,3) : config(dimension,9,7,5);
-    const poisson::Int3 shape{2,2,dimension==3 ? 2 : 1};
+    if(shape[0]==0) shape={2,2,dimension==3 ? 2 : 1};
     const int ranks=shape[0]*shape[1]*shape[2];
     const auto whole=poisson::make_grid(c,{1,1,1},{0,0,0});
     const auto full_initial=poisson::initialize_fields(whole,"polynomial");
@@ -164,7 +164,14 @@ int main(int argc,char* argv[]) {
         if(check=="decomposition") decomposition(); else if(check=="stencil") stencil();
         else if(check=="regions") regions(); else if(check=="exchange2d") { exchange(2); exchange(2,true); }
         else if(check=="exchange3d") { exchange(3); exchange(3,true); } else if(check=="convergence") convergence();
-        else if(check=="configuration") configuration(); else throw std::invalid_argument("Unknown check");
+        else if(check=="configuration") configuration();
+        else if(check=="cartesian_part3") {
+            exchange(2,false,{2,3,1}); exchange(2,false,{3,2,1});
+            exchange(2,true,{3,2,1});
+            exchange(3,false,{2,2,1}); exchange(3,false,{1,2,2});
+            exchange(3,false,{2,1,2}); exchange(3,false,{3,2,2});
+            exchange(3,true,{2,2,2});
+        } else throw std::invalid_argument("Unknown check");
         std::cout << "Passed: " << check << '\n'; return 0;
     } catch(const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }
 }

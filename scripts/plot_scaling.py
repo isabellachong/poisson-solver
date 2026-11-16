@@ -15,6 +15,8 @@ import argparse
 from collections import defaultdict
 import csv
 import math
+import hashlib
+import json
 from pathlib import Path
 import statistics
 
@@ -43,13 +45,14 @@ def style_axes(ax, xlabel, ylabel, *, log_y=False, resource_points=None):
 
 
 def plot_scaling_group(plt, output, key, schedules, metric):
-    kind, mode, communication, problem, iterations = key
+    kind, mode, communication, problem, iterations = key[:5]
     overlaps = sorted(schedules)
     fig, axes = plt.subplots(1, len(overlaps), squeeze=False,
                              figsize=(5*len(overlaps), 4.8))
     footnotes = []
     labels = {'runtime': 'Solve time (s)', 'speedup': 'Relative speedup',
-              'efficiency': 'Weak-scaling efficiency' if kind == 'weak' else 'Parallel efficiency'}
+              'efficiency': 'Weak-scaling efficiency' if kind == 'weak' else 'Parallel efficiency',
+              'serial_speedup': 'Serial CPU time / parallel time'}
     for ax, overlap in zip(axes[0], overlaps):
         curves = schedules[overlap]
         resources = set()
@@ -109,13 +112,13 @@ def plot_scaling_group(plt, output, key, schedules, metric):
     for ax, note in zip(axes[0], footnotes):
         position = ax.get_position()
         fig.text((position.x0+position.x1)/2, .015, note, ha='center', va='bottom', fontsize=8)
-    stem = f'{kind}_{mode}_{communication}_{problem}_k{iterations}'
+    stem = series_stem(key)
     fig.savefig(output/(stem+f'_{metric}.png'), dpi=300)
     plt.close(fig)
 
 
 def plot_serial_group(plt, output, key, schedules):
-    _, _, communication, problem, iterations = key
+    _, _, communication, problem, iterations = key[:5]
     curves = schedules['0']
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2), sharey=True)
     for dimension, curve in sorted(curves.items()):
@@ -135,34 +138,64 @@ def plot_serial_group(plt, output, key, schedules):
                  va='top', fontsize=9)
     fig.suptitle(f'Vanda serial Jacobi: {int(iterations):,} iterations on one CPU core', fontsize=12)
     fig.tight_layout()
-    fig.savefig(output/f'serial_serial_{communication}_{problem}_k{iterations}_runtime.png', dpi=300)
+    fig.savefig(output/(series_stem(key)+'_runtime.png'), dpi=300)
     plt.close(fig)
+
+
+def series_stem(key):
+    kind, mode, communication, problem, iterations = key[:5]
+    return f'{kind}_{mode}_{communication}_{problem}_k{iterations}'+(key[5] if len(key)>5 else '')
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--input', nargs='+', required=True)
     p.add_argument('--output-dir', default='results/figures')
+    p.add_argument('--serial-only', action='store_true', help='Validate serial-only inputs and save input hashes')
+    p.add_argument('--serial-reference', nargs='+', help='Matched serial CSVs; match label/grid/problem/iterations/warmup')
     a = p.parse_args()
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     plt.rcParams.update({'font.size': 10, 'axes.spines.top': False,
                          'axes.spines.right': False})
+    def baseline_key(row):
+        return tuple(row[k] for k in ('dimension', 'nx', 'ny', 'nz', 'problem', 'iterations', 'warmup')) + (row.get('label', ''),)
+    serial_times = defaultdict(list)
+    for filename in a.serial_reference or []:
+        with Path(filename).open() as stream:
+            for row in csv.DictReader(stream):
+                if a.serial_only and (row['mode'] != 'serial' or row['experiment'] != 'serial'):
+                    raise ValueError('--serial-only requires serial measurements')
+                if row['experiment'] == 'layout':
+                    raise ValueError('Use layout_study.py plot for layout comparisons; shapes must not be merged')
+                if row['mode'] != 'serial' or int(row['check_every']) != 0:
+                    raise ValueError('Serial reference must contain fixed-iteration serial runs')
+                seconds = float(row['solve_seconds'])
+                if not math.isfinite(seconds) or seconds <= 0:
+                    raise ValueError('Serial reference runtime must be finite and positive')
+                serial_times[baseline_key(row)].append(seconds)
     series = defaultdict(list)
     for filename in a.input:
         with Path(filename).open() as stream:
             for row in csv.DictReader(stream):
+                if a.serial_only and (row['mode'] != 'serial' or row['experiment'] != 'serial'):
+                    raise ValueError('--serial-only requires serial measurements')
+                if row['experiment'] == 'layout':
+                    raise ValueError('Use layout_study.py plot for layout comparisons; shapes must not be merged')
                 if int(row['check_every']) != 0:
                     raise ValueError('These plots require matched fixed-iteration measurements')
                 key = tuple(row[k] for k in ('experiment', 'mode', 'dimension', 'overlap', 'communication', 'problem', 'iterations'))
+                key += (row.get('label', ''), row['warmup'], row['block_size'], row['device_name'])
                 series[key].append(row)
     output = Path(a.output_dir)
     output.mkdir(parents=True, exist_ok=True)
     tables = []
     plot_groups = defaultdict(lambda: defaultdict(dict))
     for key, rows in series.items():
-        kind, mode, dim, overlap, communication, problem, iterations = key
+        kind, mode, dim, overlap, communication, problem, iterations, label, warmup, block_size, device = key
+        if mode == 'mpi-cuda' and any(int(r['gpus_used']) < 1 for r in rows):
+            raise ValueError('GPU runs must report at least one GPU')
         if mode == 'mpi-cuda' and kind in ('strong', 'weak'):
             ratios = {int(r['mpi_ranks'])/int(r['gpus_used']) for r in rows}
             fixed_ranks = len({r['mpi_ranks'] for r in rows}) == 1
@@ -175,8 +208,11 @@ def main():
         for row in rows:
             grouped[int(row[resource_key])].append(row)
         points = sorted(grouped)
-        if kind in ('strong', 'sharing') and len({r['unknowns'] for r in rows}) != 1:
-            raise ValueError('Strong scaling and sharing input must hold global unknown count fixed')
+        for records in grouped.values():
+            if len({(r['px'], r['py'], r['pz']) for r in records}) > 1:
+                raise ValueError('Different process grids at the same resource count; use layout_study.py plot')
+        if kind in ('strong', 'sharing') and len({(r['nx'],r['ny'],r['nz']) for r in rows}) != 1:
+            raise ValueError('Strong scaling and sharing input must hold the global grid shape fixed')
         if kind == 'weak':
             workloads = {int(r['unknowns'])/int(r[resource_key]) for r in rows}
             if len(workloads) != 1:
@@ -190,20 +226,37 @@ def main():
         speedups = [times[0]/t for t in times]
         efficiencies = ([times[0]/t for t in times] if kind == 'weak' else
                         [s/(n/points[0]) for s, n in zip(speedups, points)])
+        serial_speedups = []
         for i, n in enumerate(points):
+            serial_time = ''
+            if a.serial_reference and kind in ('strong', 'sharing'):
+                matches = serial_times.get(baseline_key(grouped[n][0]))
+                if not matches:
+                    raise ValueError('No serial reference matches grid, problem, iterations, warmup and label')
+                serial_time = statistics.median(matches)
+                serial_speedups.append(serial_time/times[i])
             tables.append(dict(experiment=kind, mode=mode, dimension=dim, overlap=overlap,
+                               label=label, problem=problem, iterations=iterations, warmup=warmup,
+                               block_size=block_size, device_name=device, samples=len(grouped[n]),
                                communication=communication, resource_axis=resource_key, resources=n,
                                baseline_resources=points[0], median_seconds=times[i], min_seconds=low[i],
                                max_seconds=high[i], relative_speedup='' if kind == 'serial' else speedups[i],
+                               serial_seconds=serial_time, speedup_vs_serial=serial_speedups[-1] if serial_time != '' else '',
                                efficiency=efficiencies[i] if kind in ('strong', 'weak') else ''))
-        plot_key = (kind, mode, communication, problem, iterations)
+        plot_key = (kind, mode, communication, problem, iterations, label, warmup, block_size, device)
         plot_groups[plot_key][overlap][dim] = dict(
             points=points, runtime=times, low=low, high=high, speedup=speedups,
-            efficiency=efficiencies, counts=[len(grouped[n]) for n in points],
+            efficiency=efficiencies, serial_speedup=serial_speedups, counts=[len(grouped[n]) for n in points],
             unknowns=[int(grouped[n][0]['unknowns']) for n in points],
             nonzeros=[int(grouped[n][0]['nonzeros']) for n in points],
             gpus=[int(grouped[n][0]['gpus_used']) for n in points])
-    for key, schedules in plot_groups.items():
+    base_counts = defaultdict(int)
+    for key in plot_groups:
+        base_counts[key[:5]] += 1
+    for index, (metadata_key, schedules) in enumerate(plot_groups.items()):
+        key = metadata_key[:5]
+        if base_counts[key] > 1:
+            key += (f'_series{index}',)
         kind = key[0]
         if kind == 'serial':
             plot_serial_group(plt, output, key, schedules)
@@ -213,19 +266,28 @@ def main():
             metrics.append('efficiency')
         if kind in ('strong', 'sharing'):
             metrics.append('speedup')
+        if a.serial_reference and kind in ('strong', 'sharing'):
+            metrics.append('serial_speedup')
         for metric in metrics:
             plot_scaling_group(plt, output, key, schedules, metric)
         if kind == 'weak':
             # Remove only this series' obsolete generated size plots when
             # reusing an output directory from an earlier script version.
-            _, mode, communication, problem, iterations = key
-            stem = f'weak_{mode}_{communication}_{problem}_k{iterations}'
+            _, mode, communication, problem, iterations = key[:5]
+            stem = series_stem(key)
             for field in ('unknowns', 'nonzeros'):
                 (output/f'{stem}_runtime_vs_{field}.png').unlink(missing_ok=True)
     if tables:
         with (output/'summary.csv').open('w', newline='') as stream:
             writer = csv.DictWriter(stream, fieldnames=list(tables[0]))
             writer.writeheader(); writer.writerows(tables)
+    if a.serial_only:
+        if not tables:
+            raise ValueError('Supply nonempty serial size-sweep CSVs')
+        metadata = {str(Path(name).resolve()): hashlib.sha256(Path(name).read_bytes()).hexdigest()
+                    for name in a.input}
+        (output/'serial_inputs.metadata.json').write_text(
+            json.dumps(dict(inputs_sha256=metadata), indent=2)+'\n')
     print(f'Saved figures and median summary to {output}')
 
 

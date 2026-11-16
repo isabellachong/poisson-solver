@@ -135,7 +135,7 @@ def render(summaries, output):
     plt.rcParams.update({'font.size': 10, 'axes.spines.top': False, 'axes.spines.right': False})
     for overlap in sorted({r['comparison_overlap'] for r in summaries}):
         for metric in ('runtime', 'speedup'):
-            fig, axes = plt.subplots(1, 2, figsize=(14, 5.6), sharey=True)
+            fig, axes = plt.subplots(2, 1, figsize=(8.0, 9.0), sharey=True)
             for ax, dim, color, marker in zip(axes, (2, 3), ('#176b98', '#c46b23'), ('o', 's')):
                 rows = [r for r in summaries if r['dimension'] == dim and r['comparison_overlap'] == overlap]
                 x = list(range(len(rows)))
@@ -165,7 +165,7 @@ def render(summaries, output):
             first = summaries[0]
             fig.suptitle(f'Serial / MPI CPU / MPI+CUDA: {first["iterations"]:,} iterations | '
                          f'{first["problem"]} problem\nCommunication overlap {"on" if overlap else "off"} for parallel runs')
-            fig.tight_layout(rect=(0, .09, 1, 1))
+            fig.tight_layout(rect=(0, .075, 1, .95), h_pad=2.4)
             note = (f'Median of {first["repeats"]} runs; bars show min-max runtime. Dotted: serial baseline.'
                     if metric == 'runtime' else 'Ratios of median runtimes; dotted: serial baseline (1).')
             fig.text(.5, .025, note+'\nGPU labels specify MPI ranks; CPU labels assume one allocated core per rank.',

@@ -1,5 +1,5 @@
 add_executable(poisson_tests test_numerics.cpp)
 target_link_libraries(poisson_tests PRIVATE poisson_common)
-foreach(check IN ITEMS decomposition stencil regions exchange2d exchange3d convergence configuration)
+foreach(check IN ITEMS decomposition stencil regions exchange2d exchange3d convergence configuration cartesian_part3)
   add_test(NAME "${check}" COMMAND poisson_tests "${check}")
 endforeach()
